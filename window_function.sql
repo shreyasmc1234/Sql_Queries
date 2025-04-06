@@ -101,3 +101,32 @@ dense_rank() over(partition by dept_name order by salary desc) as dense_rank1 ,
 row_number() over(partition by dept_name order by salary desc) as row_number1 from employee as c
 
 
+
+Write a query to fetch if the salary of the employee is higher,lower or equal to the previous employee as per the department.
+
+select emp_id,emp_name,
+case 
+    when salary<prev_sal then 'Salary is higher'
+    when salary>prev_sal then 'Salary is lower'
+    when salary=prev_sal then 'Salary is same'
+    when prev_sal is null then 'There is no previous salary'
+end as Salary_status
+from
+    (
+select a.*,
+lag(salary) over(partition by dept_name order by salary) as prev_sal
+from employee as a
+    ) as a;
+
+or 
+
+select a.*,
+lag(salary,1,0) over(partition by dept_name order by salary) as prev_sal,
+case 
+    when salary<lag(salary) over(partition by dept_name order by salary) then 'Salary is higher'
+    when salary>lag(salary) over(partition by dept_name order by salary) then 'Salary is lower'
+    when salary=lag(salary) over(partition by dept_name order by salary) then 'Salary is same'
+    when prev_sal=0 then 'There is no previous salary'
+end as Salary_status
+from employee as a;
+
